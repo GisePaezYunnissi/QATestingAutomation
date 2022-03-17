@@ -23,9 +23,12 @@ public class ProductDetailPage {
         return model.getText();
     };
     public String getPrice() {
-        return price.getText();
+        String priceText = price.getText();
+        int inicioPrice = priceText.indexOf("$") + 1;
+        int finPrice = priceText.indexOf("*") - 1;
+        return (priceText.substring(inicioPrice, finPrice));
     };
-    public void ClickAddToCartButton() {
+    public void clickAddToCartButton() {
         addToCartButton.click();
     };
 }

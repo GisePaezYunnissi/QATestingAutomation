@@ -1,24 +1,25 @@
-import org.junit.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import pages.MenuPage;
-import pages.ProductDetailPage;
-import pages.ProductPage;
-import pages.StoreHomePage;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+import pages.*;
 import utility.DriverFactory;
 import utility.PropertiesFile;
 
 import java.util.concurrent.TimeUnit;
 
-public class Prueba2Demoblaze {
+public class Demoblaze {
         private String url = PropertiesFile.getProperty("url");
         private WebDriver driver = DriverFactory.getDriver();
+        private final int TIEMPO = 10;
         StoreHomePage storeHomePage;
         ProductPage productPage;
         ProductDetailPage productDetailPage;
-        private final int TIEMPO = 20;
         MenuPage menuPage;
+        CartPage cartPage;
+        FormPage formPage;
+        ConfirmationPage confirmationPage;
 
         @Test
         public void addToCart() throws InterruptedException {
@@ -28,6 +29,9 @@ public class Prueba2Demoblaze {
             productPage = new ProductPage(driver);
             productDetailPage = new ProductDetailPage(driver);
             menuPage = new MenuPage(driver);
+            cartPage = new CartPage(driver);
+            formPage = new FormPage(driver);
+            confirmationPage = new ConfirmationPage(driver);
 
             //Maximizo la página y navego
             driver.manage().window().maximize();
@@ -48,15 +52,35 @@ public class Prueba2Demoblaze {
             System.out.println("Modelo:" + modelo + "Precio:" + precio);
 
             //Agrego al cart
-            productDetailPage.ClickAddToCartButton();
+            productDetailPage.clickAddToCartButton();
             WebDriverWait wait = new WebDriverWait(driver,TIEMPO);
             wait.until(ExpectedConditions.alertIsPresent());
             driver.switchTo().alert().accept();
 
             //Hacer click en Cart
-            menuPage.ClickCart();
-            //Se realiza una espera para poder ver el precio
-            menuPage.getPrice(TIEMPO);
+            menuPage.clickCart();
+
+            //Declaro las variable
+            String modelCart;
+            String priceCart;
+            modelCart = cartPage.getModelCart();
+            priceCart = cartPage.getPriceCart();
+            System.out.println("Modelo:" + modelCart + "Precio:" + priceCart);
+            //Valido que el titulo de la columna y precio es el mismo
+            Assert.assertEquals(modelo,modelCart);
+            Assert.assertEquals(precio,priceCart);
+
+            //Hacer click en el boton de ordenar
+            cartPage.clickButtonPlaceOrder();
+
+            //Completar el formulario
+            formPage.formComplete("Paula","Alaska","Palmer","42857541924","Julio","2027");
+
+            //Hacer click en el boton comprar
+            formPage.clickButtonPurchase();
+
+            //Mensaje de confirmación
+            Assert.assertEquals(confirmationPage.getMessage(), "Thank you for your purchase!");
 
             //Cierro el navegador
             driver.quit();
