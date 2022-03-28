@@ -1,21 +1,31 @@
 package pages;
 
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
+import utility.PropertiesFile;
 
-public class StoreHomePage {
-    @FindBy (linkText = "Laptops")
+public class StoreHomePage extends BasePage {
+    @FindBy(linkText = "Laptops")
     WebElement laptopsCategory;
-    WebDriver driver;
 
-    public StoreHomePage(WebDriver driver) {
-        this.driver = driver;
+    public StoreHomePage() {
+        this.driver = getDriver();
         PageFactory.initElements(driver, this);
     }
+
     //Le damos acciones
     public void clickLaptopCategory() {
-        laptopsCategory.click();
+        clickOnWebElement(laptopsCategory);
+    }
+
+    //Maximizo la página y navego
+    public void navigateStoreHome() {
+        driver.manage().window().maximize();
+        driver.navigate().to(PropertiesFile.getProperty("url"));
+    }
+
+    public void quit() {
+        driver.quit();
     }
 }

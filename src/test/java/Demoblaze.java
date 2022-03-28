@@ -1,89 +1,84 @@
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
+import Data.DataProviderDemoblaze;
 import org.testng.Assert;
+import org.testng.annotations.AfterTest;
 import org.testng.annotations.Test;
 import pages.*;
-import utility.DriverFactory;
 import utility.PropertiesFile;
 
-import java.util.concurrent.TimeUnit;
-
 public class Demoblaze {
-        private String url = PropertiesFile.getProperty("url");
-        private WebDriver driver = DriverFactory.getDriver();
-        private final int TIEMPO = 10;
-        StoreHomePage storeHomePage;
-        ProductPage productPage;
-        ProductDetailPage productDetailPage;
-        MenuPage menuPage;
-        CartPage cartPage;
-        FormPage formPage;
-        ConfirmationPage confirmationPage;
+    private String url = PropertiesFile.getProperty("url");
+    private final int TIME = 10;
 
-        @Test
-        public void addToCart() throws InterruptedException {
+    @Test(dataProvider = "toCompleteForm", dataProviderClass = DataProviderDemoblaze.class)
+    public void addToCart(String name, String country, String city, String card, String month, String year) throws InterruptedException {
 
-            //Instanciar
-            storeHomePage  = new StoreHomePage(driver);
-            productPage = new ProductPage(driver);
-            productDetailPage = new ProductDetailPage(driver);
-            menuPage = new MenuPage(driver);
-            cartPage = new CartPage(driver);
-            formPage = new FormPage(driver);
-            confirmationPage = new ConfirmationPage(driver);
+        //Instanciar las pages
+        StoreHomePage storeHomePage = new StoreHomePage();
+        ProductsPage productsPage = new ProductsPage();
+        ProductDetailPage productDetailPage = new ProductDetailPage();
+        MenuPage menuPage = new MenuPage();
+        CartPage cartPage = new CartPage();
+        FormPage formPage = new FormPage();
+        ConfirmationPage confirmationPage = new ConfirmationPage();
+        WaitsPage waitsPage = new WaitsPage();
 
-            //Maximizo la página y navego
-            driver.manage().window().maximize();
-            driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
-            driver.navigate().to(url);
+        //Navegar por la página
+        storeHomePage.navigateStoreHome();
 
-            //Busco link a categoría laptop
-            storeHomePage.clickLaptopCategory();
+        //Busco link a categoría laptop
+        storeHomePage.clickLaptopCategory();
 
-            //Hacer click en el primer producto
-            productPage.selectProduct(TIEMPO);
+        //Hacer click en el primer producto
+        productsPage.selectProductInRange(780, 890);
 
-            //Obtengo modelo y precio del producto, imprimo por consola
-            String modelo;
-            String precio;
-            modelo = productDetailPage.getModel();
-            precio = productDetailPage.getPrice();
-            System.out.println("Modelo:" + modelo + "Precio:" + precio);
+        //Obtengo modelo y precio del producto, imprimo por consola
+        String modelo;
+        String precio;
+        modelo = productDetailPage.getModel();
+        precio = productDetailPage.getPrice();
+        System.out.println("Modelo:" + modelo + "Precio:" + precio);
 
-            //Agrego al cart
-            productDetailPage.clickAddToCartButton();
-            WebDriverWait wait = new WebDriverWait(driver,TIEMPO);
-            wait.until(ExpectedConditions.alertIsPresent());
-            driver.switchTo().alert().accept();
+        //Agrego al cart
+        productDetailPage.clickAddToCartButton();
+        Assert.assertEquals(waitsPage.waitForAlert(), "Product added");
 
-            //Hacer click en Cart
-            menuPage.clickCart();
+        //Hacer click en Cart
+        menuPage.clickCart();
 
-            //Declaro las variable
-            String modelCart;
-            String priceCart;
-            modelCart = cartPage.getModelCart();
-            priceCart = cartPage.getPriceCart();
-            System.out.println("Modelo:" + modelCart + "Precio:" + priceCart);
-            //Valido que el titulo de la columna y precio es el mismo
-            Assert.assertEquals(modelo,modelCart);
-            Assert.assertEquals(precio,priceCart);
+        //Declaro las variable
+        String modelCart;
+        String priceCart;
+        modelCart = cartPage.getModelCart();
+        priceCart = cartPage.getPriceCart();
+        System.out.println("Modelo:" + modelCart + "Precio:" + priceCart);
+        //Valido que el titulo de la columna y precio es el mismo
+        Assert.assertEquals(modelo, modelCart);
+        Assert.assertEquals(precio, priceCart);
+        //Hacer click en el boton de ordenar
+        cartPage.clickButtonPlaceOrder();
 
-            //Hacer click en el boton de ordenar
-            cartPage.clickButtonPlaceOrder();
+        //Completar el formulario
+        formPage.formComplete(name, country, city, card, month, year);
+        //Hacer click en el boton comprar
+        formPage.clickButtonPurchase();
 
-            //Completar el formulario
-            formPage.formComplete("Paula","Alaska","Palmer","42857541924","Julio","2027");
+        //Mensaje de confirmación
+        Assert.assertEquals(confirmationPage.getMessage(), "Thank you for your purchase!");
 
-            //Hacer click en el boton comprar
-            formPage.clickButtonPurchase();
+        //Validar price, name, card igual al modal
+        Assert.assertTrue(confirmationPage.getValidate().contains(priceCart));
+        Assert.assertTrue(confirmationPage.getValidate().contains(name));
+        Assert.assertTrue(confirmationPage.getValidate().contains(card));
 
-            //Mensaje de confirmación
-            Assert.assertEquals(confirmationPage.getMessage(), "Thank you for your purchase!");
+        confirmationPage.clickButtonOk();
+    }
 
-            //Cierro el navegador
-            driver.quit();
-        }
+    @AfterTest
+
+    public void AfterTest() {
+        StoreHomePage storeHomePage = new StoreHomePage();
+        //Cierro el navegador
+        storeHomePage.quit();
+    }
 }
 

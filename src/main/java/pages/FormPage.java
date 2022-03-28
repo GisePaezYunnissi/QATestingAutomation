@@ -1,61 +1,70 @@
 package pages;
 
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 
-public class FormPage {
+public class FormPage extends BasePage {
     @FindBy(xpath = "//input[@id='name']")
-    WebElement name;
-    @FindBy(xpath = "//input[@id='country']" )
-    WebElement country;
+    WebElement inputName;
+    @FindBy(xpath = "//input[@id='country']")
+    WebElement inputCountry;
     @FindBy(xpath = "//input[@id='city']")
-    WebElement city;
+    WebElement inputCity;
     @FindBy(id = "card")
-    WebElement card;
+    WebElement inputCard;
     @FindBy(xpath = "//input[@id='month']")
-    WebElement month;
+    WebElement inputMonth;
     @FindBy(xpath = "//input[@id='year']")
-    WebElement year;
+    WebElement inputYear;
     @FindBy(xpath = "//button[text()='Purchase']")
     WebElement buttonPurchase;
-    WebDriver driver;
+    @FindBy(xpath = "//button[text()='Close']")
+    WebElement buttonClose;
 
-    public FormPage(WebDriver driver){
-        this.driver = driver;
+    public FormPage() {
+        this.driver = getDriver();
         PageFactory.initElements(driver, this);
     }
 
-    public void formName(String nameInput){
-        name.sendKeys(nameInput);
-    }
-    public void formCountry(String countryInput){
-        country.sendKeys(countryInput);
-    }
-    public void formCity(String cityInput){
-        city.sendKeys(cityInput);
-    }
-    public void formCard(String creditCardInput){
-        card.sendKeys(creditCardInput);
-    }
-    public void formMonth(String monthInput){
-        month.sendKeys(monthInput);
-    }
-    public void formYear(String yearInput){
-        year.sendKeys(yearInput);
+    public void formName(String name) {
+        sendKeysToWebElement(inputName, name);
     }
 
-    public void formComplete(String nameInput, String countryInput, String cityInput, String creditCardInput, String monthInput, String yearInput){
-        formName(nameInput);
-        formCountry(countryInput);
-        formCity(cityInput);
-        formCard(creditCardInput);
-        formMonth(monthInput);
-        formYear(yearInput);
+    public void formCountry(String country) {
+        sendKeysToWebElement(inputCountry, country);
     }
 
-    public void clickButtonPurchase(){
-        buttonPurchase.click();
+    public void formCity(String city) {
+        sendKeysToWebElement(inputCity, city);
+    }
+
+    public void formCard(String card) {
+        sendKeysToWebElement(inputCard, card);
+    }
+
+    public void formMonth(String month) {
+        sendKeysToWebElement(inputMonth, month);
+    }
+
+    public void formYear(String year) {
+        sendKeysToWebElement(inputYear, year);
+    }
+
+    public void clickButtonPurchase() {
+        clickOnWebElement(buttonPurchase);
+    }
+
+    public void clickButtonClose() {
+        clickOnWebElement(buttonClose);
+    }
+
+    public void formComplete(String name, String country, String city, String card, String month, String year) {
+        formName(name);
+        formCountry(country);
+        formCity(city);
+        formCard(card);
+        formMonth(month);
+        formYear(year);
     }
 }
